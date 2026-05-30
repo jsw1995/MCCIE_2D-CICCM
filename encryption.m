@@ -1,77 +1,44 @@
 function [ cip,dnkey,ext_val,sort_hist,T2 ] = encryption( im,cover,key )
-% ÈıÍ¨µÀ·Ö±ğÑ¹Ëõ£¬ºÏ²¢Ò»Æğ£¬ÖÃÂÒ£¬ÓĞÒâÒåÃÜÎÄÇ¶Èë
+% ä¸‰é€šé“åˆ†åˆ«å‹ç¼©ï¼Œåˆå¹¶ä¸€èµ·ï¼Œç½®ä¹±ï¼Œæœ‰æ„ä¹‰å¯†æ–‡åµŒå…¥
 % key='8d5ab8ba5340fce4420829ad5d12a0e45dacb0858544163d04c1d02b73e3697d';
-
-tic
 
 [m,n,k]=size(im);
 [M,N,K]=size(cover);
-% ÃÜÔ¿Éú³É
+% å¯†é’¥ç”Ÿæˆ
 [ dnkey ] = dkey( im,key );
 a1 = dnkey(1);b1=dnkey(2);x01=dnkey(3);y01=dnkey(4);
 a2 = dnkey(5);b2=dnkey(6);x02=dnkey(7);y02=dnkey(8);
 a3 = dnkey(9);b3=dnkey(10);x03=dnkey(11);y03=dnkey(12);
 
-% ½×ÌİÊ½Ñ¹Ëõ
-
+% é˜¶æ¢¯å¼å‹ç¼©
 [ x1,y1 ] = CICCM_2D( [x01,y01],[a1,b1], m*n*1.5 );
-
 [ T1,ext_val ] = comp_3d( im,x1,y1 );
-% figure(100)
-% imshow(uint8(T1))
-% T11 = T1;
-% plothist( T1,101 )
-% bin_T2 = dec2bin(uint8(T1),8) - '0';
-% p_t2 = sum(sum(bin_T2))/(256*256*3*8)
 
-% Ö±·½Í¼ÖØ×é
+% ç›´æ–¹å›¾é‡ç»„
 [ T1,sort_hist ] = hre( T1 );
 
-% figure(102)
-% imshow(uint8(T1))
-% plothist( T1,103 )
-% bin_T2 = dec2bin(uint8(T1),8) - '0';
-% p_t2 = sum(sum(bin_T2))/(256*256*3*8)
-
-% % Ö±·½Í¼ÒÆÎ»¶Ô±È×÷Í¼
-% [hist,~] = imhist(uint8(T11));
-% [~,index] = max (hist);
-% TT = index-11;
-% X3 = mod(T11-TT,256);
-% plothist( X3,1031 )
-% bin_X3 = dec2bin(uint8(X3),8) - '0';
-% p_X3 = sum(sum(bin_X3))/(256*256*3*8)
-
-% bitÖÃÂÒ
+% bitç½®ä¹±
 [ x2,y2 ] = CICCM_2D( [x02,y02],[a2,b2], 2*m+n*k );
 [T2] = bit_scram( uint8(T1),x2,y2 );
-% T2 = T1;
-% figure(104)
-% imshow(uint8(T2))
-% plothist( T2,105 )
 
-toc
-tic
-
-% Ç¶Èë
+% åµŒå…¥
 [ x3,y3 ] = CICCM_2D( [x03,y03],[a3,b3], M+N*K );
 [ cip ] = embed( T2,cover,x3,y3 );
 
-toc
 
 end
 
 
 function [ dnkey ] = dkey( p,key )
-%   DKEY ¶¯Ì¬ÃÜÔ¿Éú³É
-%   pÃ÷ÎÄ£¬key¶¯Ì¬ÃÜÔ¿ 
+%   DKEY åŠ¨æ€å¯†é’¥ç”Ÿæˆ
+%   pæ˜æ–‡ï¼ŒkeyåŠ¨æ€å¯†é’¥ 
 
 x = ones(1,256);
 sha_sum = 0;
 time = clock;
 sha_time = SHA(time,'SHA-256');
 sha_p = SHA(p,'SHA-256');
-for i=1:32  % hex2decÖ»ÄÜµ½2^52£¬ËùÒÔÔËÓÃÑ­»·Ã¿8Î»À´Ò»´Î£¬Ò²¿ÉÒÔÆäËûÎ»Êı
+for i=1:32  % hex2decåªèƒ½åˆ°2^52ï¼Œæ‰€ä»¥è¿ç”¨å¾ªç¯æ¯8ä½æ¥ä¸€æ¬¡ï¼Œä¹Ÿå¯ä»¥å…¶ä»–ä½æ•°
     tem = ones(1,8);
     tem2 = ones(1,8);
     sn = dec2bin(hex2dec(sha_p((i-1)*2+1:(i-1)*2+2)),8);
@@ -192,7 +159,7 @@ end
 
 function [ x,y ] = CICCM_2D( init,para,L )
 %   IICM 
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
 x = []; y= [];
 x(1)=init(1);y(1)=init(2);
@@ -212,7 +179,7 @@ end
 
 function [ T1,AA ] = comp_3d( im,R1,R2 )
 
-% Ñ¹ËõÂÊÎª 0.25
+% å‹ç¼©ç‡ä¸º 0.25
 
 [m,n,k]=size(im);
 % a1=ceil(0.7*m);b1=ceil(0.7*n);  % 359
@@ -231,7 +198,7 @@ y2 = reshape(R2(b1*n+1:b1*n+b2*n),[b2,n]);
 x3 = reshape(R1(a1*m+a2*m+1:a1*m+a2*m+a3*m),[a3,m]);
 y3 = reshape(R2(b1*n+b2*n+1:b1*n+b2*n+b3*n),[b3,n]);
 
-% Ñ¹Ëõ
+% å‹ç¼©
 T=1000;
 % fai11 = sqrt(2/a1)*x1;
 % fai21 = sqrt(2/b1)*y1;
@@ -275,7 +242,7 @@ max_cip_b = max(max(T1_b));
 min_cip_b = min(min(T1_b));
 cip_b = round((T1_b-min_cip_b)/(max_cip_b-min_cip_b) * 255);
 
-% ÕâÊ±ºòÖ±·½Í¼ÒÆÎ»ÄØ£¬Èı¸öÒÆÎ»²ÎÊıÄ£Ê½
+% è¿™æ—¶å€™ç›´æ–¹å›¾ç§»ä½å‘¢ï¼Œä¸‰ä¸ªç§»ä½å‚æ•°æ¨¡å¼
 
 T1 = 127*ones([0.5*m,0.5*n,k]);
 T1(1:a1*b1)=cip_r; T1(a1*b1+1:a1*b1+a2*b2)=cip_g; T1(a1*b1+a2*b2+1:a1*b1+a2*b2+a3*b3)=cip_b;
@@ -299,8 +266,8 @@ end
 end
 
 function [ cip ] = bit_scram( im,r1,r2 )
-%   SCRAM ÂÒĞòÑ­»·ÒÆÎ»
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+%   SCRAM ä¹±åºå¾ªç¯ç§»ä½
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
 [m,n,k]=size(im);
 bin_T2 = dec2bin(im,8) - '0';
@@ -310,7 +277,7 @@ bin_T2 = reshape(bin_T2,[3*m*n,8]);
 T2 = bin2dec(char(bin_T2 + '0'));
 cip = reshape(T2,[m,n,k]);
 
-% ÊÇ·Ö²¼¾ùÔÈµÄ£¬ÖÃÂÒÒÔºóÖµ±È½Ï¼¯ÖĞ£¬Ïà¹ØĞÔ±È½Ï¸ß
+% æ˜¯åˆ†å¸ƒå‡åŒ€çš„ï¼Œç½®ä¹±ä»¥åå€¼æ¯”è¾ƒé›†ä¸­ï¼Œç›¸å…³æ€§æ¯”è¾ƒé«˜
 % bin_T21 = bin_T2;
 % r = rand(m*n*k*8,1);
 % bin_T21 = scrambling( bin_T21,r );
@@ -320,8 +287,8 @@ cip = reshape(T2,[m,n,k]);
 end
 
 function [ cip ] = scram( im,r1,r2 )
-%   SCRAM ÂÒĞòÑ­»·ÒÆÎ»
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+%   SCRAM ä¹±åºå¾ªç¯ç§»ä½
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
 [m,n]=size(im);
 cip = im;
@@ -341,8 +308,8 @@ end
 
 end
 function [ rim ] = dscram( cip,r1,r2 )
-%   DSCRAM ½âÃÜ
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+%   DSCRAM è§£å¯†
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
 [m,n]=size(cip);
 rim = cip;
@@ -361,16 +328,16 @@ end
 end
 
 function [ cip,sort_hist ] = hre( im )
-%   Ö±·½Í¼ÖØ×é
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+%   ç›´æ–¹å›¾é‡ç»„
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
 [hist,~] = imhist(uint8(im));
-[~,sort_hist] = sort(hist, 'descend'); % ½µĞò
+[~,sort_hist] = sort(hist, 'descend'); % é™åº
 sort_hist = sort_hist-1;
 list = 0:255;
 bin_list = dec2bin(list,8) - '0';
 sum_bin = sum(bin_list,2);
-[~, sort_sum] = sort(sum_bin, 'ascend'); % ÉıĞò
+[~, sort_sum] = sort(sum_bin, 'ascend'); % å‡åº
 sort_sum = sort_sum-1; %%%%%%%%%%
 cip = im;
 for i=1:256
@@ -380,10 +347,10 @@ end
 end
 
 function [ cip ] = embed( im,cover,r1,r2 )
-%   embed ×Ô¼ºµÄÇ¶Èë²Ù×÷(¿Õ¼äÓò)
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+%   embed è‡ªå·±çš„åµŒå…¥æ“ä½œ(ç©ºé—´åŸŸ)
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
-% Ç°ÆÚ×¼±¸
+% å‰æœŸå‡†å¤‡
 [m, n, k] = size(cover);
 [m1,n1,k1] = size(im);
 im = reshape(im,[m1,n1*k1]);
@@ -391,14 +358,14 @@ im = reshape(im,[m1,n1*k1]);
 % figure(114)
 % imshow(uint8(im))
 
-% ·âÃæÖÃÂÒ
+% å°é¢ç½®ä¹±
 cover = reshape(cover,[m,n*k]);
 cover = scram( cover,r1,r2 );
 
 % figure(111)
 % imshow(uint8(cover))
 
-% ÀàÔëÉùÃÜÎÄ·Ö½â
+% ç±»å™ªå£°å¯†æ–‡åˆ†è§£
 CA11 = floor(im/64);
 CH11 = floor(mod(im,64)/16);
 CV11 = floor(mod(im,16)/4);
@@ -414,30 +381,30 @@ sp_im = [CA11,CH11;CV11,CD11];
 % figure(118)
 % imshow(uint8(CD11))
 
-% Ç¶ÈëÖµµ÷Õû
+% åµŒå…¥å€¼è°ƒæ•´
 sp_im = evd(sp_im);
 
 % figure(112)
 % imshow(uint8(sp_im))
 
-% Ç¶Èë
+% åµŒå…¥
 cip = cover;
 cip(1:2*m1,1:2*n1*k1) = mod(sp_im + mod(cover(1:2*m1,1:2*n1*k1),4), 4) + floor(cover(1:2*m1,1:2*n1*k1)/4)*4;
 
-% ĞŞÕı
+% ä¿®æ­£
 cip = correction(cover,cip,4,1);
 
 % figure(113)
 % imshow(uint8(cip))
 
-% ·´ÏòÖÃÂÒ
+% åå‘ç½®ä¹±
 cip = dscram( cip,r1,r2 );
 cip = reshape(cip,[m,n,k]);
 
 end
 function [ cip ] = evd( im )
-%   SCRAM ÂÒĞòÑ­»·ÒÆÎ»
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+%   SCRAM ä¹±åºå¾ªç¯ç§»ä½
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
 cip = im;
 cip(im==3)=2;
@@ -445,8 +412,8 @@ cip(im==2)=3;
 
 end
 function [ cip2 ] = correction( cover,cip,e,t )
-%   CORRECTION ĞŞÕı
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+%   CORRECTION ä¿®æ­£
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
 tem = cip-cover;
 cip2 = cip;
@@ -454,7 +421,7 @@ cip2(tem < -e/2) = cip(tem < -e/2) + e;
 cip2(tem > e/2) = cip(tem > e/2) - e;
 
 if t==1
-    % ÕûÊıÇ¶ÈëĞèÒª×¢Òâ²»Òª³¬·¶Î§(¿ÕÓò²ÅĞèÒª)
+    % æ•´æ•°åµŒå…¥éœ€è¦æ³¨æ„ä¸è¦è¶…èŒƒå›´(ç©ºåŸŸæ‰éœ€è¦)
     cip2(cip2 < 0) = cip(cip2 < 0);
     cip2(cip2 > 255) = cip(cip2 > 255);
 end
