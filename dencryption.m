@@ -1,44 +1,37 @@
 function [ rim ] = dencryption( cip,cover,dnkey,ext_val,sort_hist, im_shape )
-% ÈıÍ¨µÀ·Ö±ğÑ¹Ëõ£¬ºÏ²¢Ò»Æğ£¬ÖÃÂÒ£¬ÓĞÒâÒåÃÜÎÄÇ¶Èë
-% Ê¹ÓÃµÚÒ»ÖÖÇ¶Èë·½Ê½
+% ä¸‰é€šé“åˆ†åˆ«å‹ç¼©ï¼Œåˆå¹¶ä¸€èµ·ï¼Œç½®ä¹±ï¼Œæœ‰æ„ä¹‰å¯†æ–‡åµŒå…¥
+% ä½¿ç”¨ç¬¬ä¸€ç§åµŒå…¥æ–¹å¼
 
-tic
 
-% [m,n,k]=size(im);
 m = im_shape(1);n=im_shape(2);k=im_shape(3);
 [M,N,K]=size(cip);
-% ÃÜÔ¿Éú³É
+% å¯†é’¥ç”Ÿæˆ
 a1 = dnkey(1);b1=dnkey(2);x01=dnkey(3);y01=dnkey(4);
 a2 = dnkey(5);b2=dnkey(6);x02=dnkey(7);y02=dnkey(8);
 a3 = dnkey(9);b3=dnkey(10);x03=dnkey(11);y03=dnkey(12);
 
-% ÌáÈ¡
+% æå–
 [ x3,y3 ] = CICCM_2D( [x03,y03],[a3,b3], M+N*K );
 [ rT2 ] = extract( cip,cover,x3,y3,[m/2,n/2,k] );
 
-toc
-tic
 
-% ·´ÏòbitÖÃÂÒ
+% åå‘bitç½®ä¹±
 [ x2,y2 ] = CICCM_2D( [x02,y02],[a2,b2], 2*m+n*k );
 rT1 = bit_dscram( uint8(rT2),x2,y2 );
-% rT1 = double(uint8(rT2));
 
-% Ö±·½Í¼ÖØ×é
+% ç›´æ–¹å›¾é‡ç»„
 [ rT1 ] = rhre( rT1, sort_hist );
 
-% ÖØ¹¹
+% é‡æ„
 [ x1,y1 ] = CICCM_2D( [x01,y01],[a1,b1], m*n*1.5 );
 [ rim ] = recon( rT1,ext_val,x1,y1,[m,n,k] );
-
-toc
 
 end
 
 
 function [ x,y ] = CICCM_2D( init,para,L )
 %   IICM 
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
 x = []; y= [];
 x(1)=init(1);y(1)=init(2);
@@ -57,24 +50,24 @@ end
 
 
 function [ rim ] = extract( cip,cover,r1,r2,im_shape )
-%   EXTRACT ×Ô¼ºµÄÇ¶Èë²Ù×÷(¿ÕÓò)
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+%   EXTRACT è‡ªå·±çš„åµŒå…¥æ“ä½œ(ç©ºåŸŸ)
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
 
-% Ç°ÆÚ×¼±¸
+% å‰æœŸå‡†å¤‡
 [m, n, k] = size(cover);
 m1=im_shape(1); n1=im_shape(2);k1=im_shape(3);
 
-% ·âÃæºÍÃÜÎÄÖÃÂÒ
+% å°é¢å’Œå¯†æ–‡ç½®ä¹±
 cover = reshape(cover,[m,n*k]);
 cover = scram( cover,r1,r2 );
 cip = reshape(cip,[m,n*k]);
 cip = scram( cip,r1,r2 );
 
-% ÌáÈ¡
+% æå–
 rim = mod(mod(cip(1:2*m1,1:2*n1*k1),4) - mod(cover(1:2*m1,1:2*n1*k1),4), 4);
 
-% Ç¶ÈëÖµµ÷Õû
+% åµŒå…¥å€¼è°ƒæ•´
 rim = evd(rim);
 
 CA = rim(1:m1,1:n1*k1);
@@ -87,8 +80,8 @@ rim = reshape(rim,[int16(m1),int16(n1),k1]);
 
 end
 function [ cip ] = evd( im )
-%   SCRAM ÂÒĞòÑ­»·ÒÆÎ»
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+%   SCRAM ä¹±åºå¾ªç¯ç§»ä½
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
 cip = im;
 cip(im==3)=2;
@@ -97,8 +90,8 @@ cip(im==2)=3;
 end
 
 function [ rim ] = bit_dscram( cip,r1,r2 )
-%   SCRAM ÂÒĞòÑ­»·ÒÆÎ»
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+%   SCRAM ä¹±åºå¾ªç¯ç§»ä½
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
 [m,n,k]=size(cip);
 bin_T2 = dec2bin(cip,8) - '0';
@@ -111,13 +104,13 @@ rim = reshape(T2,[m,n,k]);
 end
 
 function [ rim ] = rhre( cip, sort_hist )
-%   Ö±·½Í¼ÖØ×é
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+%   ç›´æ–¹å›¾é‡ç»„
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
 list = 0:255;
 bin_list = dec2bin(list,8) - '0';
 sum_bin = sum(bin_list,2);
-[~, sort_sum] = sort(sum_bin, 'ascend'); % ÉıĞò
+[~, sort_sum] = sort(sum_bin, 'ascend'); % å‡åº
 sort_sum = sort_sum-1; %%%%%%%%%%%%%%%
 rim = cip;
 for i=1:256
@@ -127,8 +120,8 @@ end
 end
 
 function [ cip ] = scram( im,r1,r2 )
-%   SCRAM ÂÒĞòÑ­»·ÒÆÎ»
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+%   SCRAM ä¹±åºå¾ªç¯ç§»ä½
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
 [m,n]=size(im);
 cip = im;
@@ -145,8 +138,8 @@ end
 
 end
 function [ rim ] = dscram( cip,r1,r2 )
-%   DSCRAM ½âÃÜ
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+%   DSCRAM è§£å¯†
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
 [m,n]=size(cip);
 rim = cip;
@@ -167,7 +160,7 @@ end
 
 function [ rim ] = recon( T1,AA,R1,R2,im_shape )
 
-% Ñ¹ËõÂÊÎª 0.25
+% å‹ç¼©ç‡ä¸º 0.25
 m=im_shape(1);n=im_shape(2);k=im_shape(3);
 % a1=ceil(0.7*m);b1=ceil(0.7*n);
 % a2=ceil(0.4*m);b2=ceil(0.4*n);
@@ -234,8 +227,8 @@ rim(rim<0) = 0;
 
 end
 function [ rim ] = nsl0_2d( y,A,B )
-%   NSL0_2D ´Ë´¦ÏÔÊ¾ÓĞ¹Ø´Ëº¯ÊıµÄÕªÒª
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+%   NSL0_2D æ­¤å¤„æ˜¾ç¤ºæœ‰å…³æ­¤å‡½æ•°çš„æ‘˜è¦
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
 sigma_min = 0.01;
 sigma_decrease_factor = 0.05;  %
@@ -269,8 +262,8 @@ rim = s;
 
 end
 function [ tem2 ] = idct_3d( im )
-% IDCT3 ´Ë´¦ÏÔÊ¾ÓĞ¹Ø´Ëº¯ÊıµÄÕªÒª
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+% IDCT3 æ­¤å¤„æ˜¾ç¤ºæœ‰å…³æ­¤å‡½æ•°çš„æ‘˜è¦
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
 [m,~,k] = size(im);
 tem2 = im;
@@ -286,22 +279,22 @@ end
 end
 
 function [ rim ] = extract2( cip,cover,im_shape )
-%   EXTRACT ×Ô¼ºµÄÇ¶Èë²Ù×÷(¿ÕÓò)
-%   ´Ë´¦ÏÔÊ¾ÏêÏ¸ËµÃ÷
+%   EXTRACT è‡ªå·±çš„åµŒå…¥æ“ä½œ(ç©ºåŸŸ)
+%   æ­¤å¤„æ˜¾ç¤ºè¯¦ç»†è¯´æ˜
 
 
-% Ç°ÆÚ×¼±¸
+% å‰æœŸå‡†å¤‡
 [m, n, k] = size(cover);
 m1=im_shape(1); n1=im_shape(2);k1=im_shape(3);
 
-% ·âÃæºÍÃÜÎÄÖÃÂÒ
+% å°é¢å’Œå¯†æ–‡ç½®ä¹±
 cover = reshape(cover,[m,n*k]);
 cip = reshape(cip,[m,n*k]);
 
-% ÌáÈ¡
+% æå–
 rim = mod(mod(cip(1:2*m1,1:2*n1*k1),4) - mod(cover(1:2*m1,1:2*n1*k1),4), 4);
 
-% Ç¶ÈëÖµµ÷Õû
+% åµŒå…¥å€¼è°ƒæ•´
 rim = evd(rim);
 
 CA = rim(1:m1,1:n1*k1);
