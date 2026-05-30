@@ -2,8 +2,8 @@
 clc;clear all;close all;clear;
 
 %% 加密演示
-im = double(imread('E:\date\ccia_CVG_image\color_image_512/lena.ppm'));
-cover = double(imread('E:\date\ccia_CVG_image\color_image_512/baboon.ppm'));
+im = double(imread('date/lena.ppm'));
+cover = double(imread('date/baboon.ppm'));
 
 [m,n,k]=size(im);
 [M,N,K]=size(cover);
